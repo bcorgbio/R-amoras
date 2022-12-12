@@ -1,0 +1,121 @@
+---
+title: "Final Project - Remoras"
+author: "R-amoras"
+date: "2022-12-12"
+output: html_document
+---
+
+```{r, packages, include=FALSE}
+library(tidyverse)
+library(trackter)
+```
+
+# Introduction
+
+
+# Methods
+
+For this project, the main methodology involved three parts: feeding, video analysis, and statistical analysis. A Remora was left without food for about 5 days. Next, a camera was set and it recorded the subsequent feeding events. A small piece of shrimp was dropped in the tank and videos where the full side of the fish was visible for the whole feeding event were kept. The videos were clipped to only include frames from the feeding event. Next, there videos were uploaded to Fiji and a plugin called mtrack was used to place points on each frame of the video. Five points were place: one on the tip of the top jaw (1), one on the tip of the bottom jaw (2), one on the joint of the pectoral fin (3), one on the joint of the pelvic fin(4), and one at the lowest point on the fish’s gullet(5), labeled in this order. The data was loaded into R and distances were measured from points 1 to 2, 2 to 3, 3 to 4, and 3 to 5. These distances were used to calculate the change in angle to determine how much the mouth opened for the duration of the feeding event. We looked at the decrease in the angle of the lower jaw to see how much farther down it moved, the increase in angle of the upper jaw to see how much farther up it moved, and the distance between the top and bottom jaw to see how much it opened it’s mouth. 
+
+
+```{r, setup, include=FALSE}
+videos <- list.files(pattern="csv")
+
+vid1 <- read_csv(videos[1]) %>% 
+  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
+  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
+  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
+  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
+         d34=dist.2d(x_3,x_4,y_3,y_4),
+         gap=dist.2d(x_1,x_2,y_1,y_2),
+         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
+  na.omit %>% 
+  group_by(frame) %>% 
+  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
+  ungroup() %>% 
+  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
+  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
+  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
+
+vid2 <- read_csv(videos[2]) %>% 
+  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
+  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
+  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
+  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
+         d34=dist.2d(x_3,x_4,y_3,y_4),
+         gap=dist.2d(x_1,x_2,y_1,y_2),
+         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
+  na.omit %>% 
+  group_by(frame) %>% 
+  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
+  ungroup() %>% 
+  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
+  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
+  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
+
+vid3 <- read_csv(videos[3]) %>% 
+  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
+  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
+  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
+  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
+         d34=dist.2d(x_3,x_4,y_3,y_4),
+         gap=dist.2d(x_1,x_2,y_1,y_2),
+         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
+  na.omit %>% 
+  group_by(frame) %>% 
+  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
+  ungroup() %>% 
+  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
+  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
+  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
+
+vid4 <- read_csv(videos[4]) %>% 
+  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
+  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
+  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
+  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
+         d34=dist.2d(x_3,x_4,y_3,y_4),
+         gap=dist.2d(x_1,x_2,y_1,y_2),
+         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
+  na.omit %>% 
+  group_by(frame) %>% 
+  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
+  ungroup() %>% 
+  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
+  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
+  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
+
+
+vid5 <- read_csv(videos[5]) %>% 
+  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
+  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
+  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
+  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
+         d34=dist.2d(x_3,x_4,y_3,y_4),
+         gap=dist.2d(x_1,x_2,y_1,y_2),
+         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
+  na.omit %>% 
+  group_by(frame) %>% 
+  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
+  ungroup() %>% 
+  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
+  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
+  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
+```
+
+# Results
+
+
+
+# Discussion
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
