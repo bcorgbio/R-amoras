@@ -21,91 +21,65 @@ For this project, the main methodology involved three parts: feeding, video anal
 ```{r, setup, include=FALSE}
 videos <- list.files(pattern="csv")
 
-vid1 <- read_csv(videos[1]) %>% 
-  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
-  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
-  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
-  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
-         d34=dist.2d(x_3,x_4,y_3,y_4),
-         gap=dist.2d(x_1,x_2,y_1,y_2),
-         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
-  na.omit %>% 
-  group_by(frame) %>% 
-  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
-  ungroup() %>% 
-  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
-  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
-  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
-
-vid2 <- read_csv(videos[2]) %>% 
-  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
-  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
-  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
-  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
-         d34=dist.2d(x_3,x_4,y_3,y_4),
-         gap=dist.2d(x_1,x_2,y_1,y_2),
-         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
-  na.omit %>% 
-  group_by(frame) %>% 
-  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
-  ungroup() %>% 
-  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
-  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
-  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
-
-vid3 <- read_csv(videos[3]) %>% 
-  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
-  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
-  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
-  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
-         d34=dist.2d(x_3,x_4,y_3,y_4),
-         gap=dist.2d(x_1,x_2,y_1,y_2),
-         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
-  na.omit %>% 
-  group_by(frame) %>% 
-  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
-  ungroup() %>% 
-  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
-  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
-  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
-
-vid4 <- read_csv(videos[4]) %>% 
-  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
-  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
-  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
-  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
-         d34=dist.2d(x_3,x_4,y_3,y_4),
-         gap=dist.2d(x_1,x_2,y_1,y_2),
-         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
-  na.omit %>% 
-  group_by(frame) %>% 
-  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
-  ungroup() %>% 
-  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
-  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
-  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
+data <- list()
+for(i in videos){
+  exp <- gsub("Ram_vid(\\d)points.csv","\\1",i) %>% as.numeric
+  d <- read_csv(i) %>% 
+    select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
+    rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
+    pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
+    mutate(d23=dist.2d(x_1,x_3,y_1,y_3),
+           d34=dist.2d(x_3,x_4,y_3,y_4),
+           gap=dist.2d(x_1,x_2,y_1,y_2),
+           d42=dist.2d(x_4,x_1,y_4,y_1)) %>%
+    na.omit %>% 
+    group_by(frame) %>% 
+    mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
+    ungroup() %>% 
+    mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
+    mutate(hy_exp=dist.2d(x_5,x_5,y_3,y_5)/dist.2d(x_1,x_3,y_1,y_3)) %>% 
+    mutate(hy_exp2=abs(hy_exp-first(hy_exp,1))) %>% 
+    mutate(exp=exp)
+  
+  data[[i]] <- d
+}
 
 
-vid5 <- read_csv(videos[5]) %>% 
-  select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
-  rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
-  pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
-  mutate(d23=dist.2d(x_2,x_3,y_2,y_3),
-         d34=dist.2d(x_3,x_4,y_3,y_4),
-         gap=dist.2d(x_1,x_2,y_1,y_2),
-         d42=dist.2d(x_4,x_2,y_4,y_2)) %>%
-  na.omit %>% 
-  group_by(frame) %>% 
-  mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
-  ungroup() %>% 
-  mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
-  mutate(hy_exp=dist.2d(x_5,y_3,x_5,y_5)/dist.2d(x_2,y_2,x_3,y_3)) %>% 
-  mutate(hy_exp2=abs(hy_exp-first(hy_exp,1)))
+data2 <- do.call(rbind,data)
+
 ```
 
 # Results
 
+## Cranial Elevation
 
+```{r cranial, echo=FALSE}
+data2 %>% 
+  ggplot(aes(frame,CE_alpha2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+labs(y = "Cranial Elevation (\u00B0)")
+
+data2 %>% 
+  ggplot(aes(frame,CE_alpha2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+facet_wrap(~exp)+labs(y = "Cranial Elevation (\u00B0)")
+```
+
+## Hyoid Expansion
+```{r hyoid, echo=FALSE}
+data2 %>% 
+  ggplot(aes(frame,hy_exp2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+labs(y = "Hyoid Expansion")
+
+data2 %>% 
+  ggplot(aes(frame,hy_exp2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+facet_wrap(~exp)+labs(y = "Hyoid Expansion")
+
+```
+
+## Summary
+
+```{r summary, echo=FALSE}
+data2 %>% 
+  group_by(exp) %>% 
+  summarize(CE_alpha2=diff(range(CE_alpha2)),hy_exp2=diff(range(hy_exp2)),gap=diff(range(gap)))
+```
+
+For each trial, we witnessed an angle increase between the pectoral fin joint, the tip of the upper jaw, and the pelvic fin joint as the jaw began to open. The largest angle was where the top jaw was opened the widest. The difference between this largest angle and the “ resting closed mouth” angle measured which we marked as the first angle angle, was 33.5, 47.2, 36.3, 43.1, and 37.6 respectively for trials 1-5. On average, this fish had a maximum cranial elevation angle of 39.54. Additionally, the hyoid expansion, had on average an increase of 8.76 % of the head length. 
 
 # Discussion
 
