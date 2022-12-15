@@ -21,6 +21,7 @@ for(i in videos){
     mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
     mutate(hy_exp=dist.2d(x_5,x_5,y_3,y_5)/dist.2d(x_1,x_3,y_1,y_3)) %>% 
     mutate(hy_exp2=abs(hy_exp-first(hy_exp,1))) %>% 
+    mutate(gap2=abs(gap-first(gap,1))) %>% 
     mutate(exp=exp)
   
   data[[i]] <- d
@@ -41,6 +42,14 @@ data2 %>%
 data2 %>% 
   ggplot(aes(frame,hy_exp2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+facet_wrap(~exp)+labs(y = "Hyoid Expansion")
 
+data2 %>% 
+  ggplot(aes(frame,gap2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+labs(y = "Mouth Gap Change")
+
+data2 %>% 
+  ggplot(aes(frame,gap2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+facet_wrap(~exp)+labs(y = "Mouth Gap Change")
+
+
+
 # hy_exp looking at change in distance from imaginary point at top of head to
 # bottom of gullet looking at that kind of expansion
 # standardized by dividing by size of head to see change 
@@ -50,7 +59,7 @@ data2 %>%
 
 data2 %>% 
   group_by(exp) %>% 
-  summarize(CE_alpha2=diff(range(CE_alpha2)),hy_exp2=diff(range(hy_exp2)),gap=diff(range(gap)))
+  summarize(CE_alpha2=diff(range(CE_alpha2)),hy_exp2=diff(range(hy_exp2)),gap2=diff(range(gap)))
 
 diff(range(data2$CE_alpha2))
 

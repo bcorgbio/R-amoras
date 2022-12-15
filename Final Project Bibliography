@@ -1,0 +1,63 @@
+@article{CampSuction,
+year = {2020},
+title = {Fishes can use axial muscles as anchors or motors for powerful suction feeding.},
+publisher= {The Company of Biologists Ltd.},
+author ={Camp, Ariel L.and Olsen, Aaron M. and Hernandez, L. Patricia and Brainerd, Elizabeth L.},
+journal = {Journal of Experimental Biology}
+}
+
+
+@article{camp2014role,
+  title={Role of axial muscles in powering mouth expansion during suction feeding in largemouth bass (Micropterus salmoides)},
+  author={Camp, Ariel L and Brainerd, Elizabeth L},
+  journal={Journal of Experimental Biology},
+  volume={217},
+  number={8},
+  pages={1333--1345},
+  year={2014},
+  publisher={Company of Biologists}
+}
+
+@article{wang2022biomimetic,
+  title={A biomimetic remora disc with tunable, reversible adhesion for surface sliding and skimming},
+  author={Wang, Siqi and Li, Lei and Zhao, Wei and Zhang, Yiyuan and Wen, Li},
+  journal={Bioinspiration \& Biomimetics},
+  volume={17},
+  number={3},
+  pages={036001},
+  year={2022},
+  publisher={IOP Publishing}
+}
+ 
+@article{van2005test,
+  title={A test of mouth-opening and hyoid-depression mechanisms during prey capture in a catfish using high-speed cineradiography},
+  author={Van Wassenbergh, Sam and Herrel, Anthony and Adriaens, Dominique and Aerts, Peter},
+  journal={Journal of Experimental Biology},
+  volume={208},
+  number={24},
+  pages={4627--4639},
+  year={2005},
+  publisher={Company of Biologists}
+}
+
+@article{svanback2002linking,
+  title={Linking cranial kinematics, buccal pressure, and suction feeding performance in largemouth bass},
+  author={Svanb{\"a}ck, Richard and Wainwright, Peter C and Ferry-Graham, Lara A},
+  journal={Physiological and Biochemical Zoology},
+  volume={75},
+  number={6},
+  pages={532--543},
+  year={2002},
+  publisher={The University of Chicago Press}
+}
+
+@article{lomax2020bifunctional,
+  title={Bifunctional role of the sternohyoideus muscle during suction feeding in striped surfperch, Embiotoca lateralis},
+  author={Lomax, JJ and Martinson, TF and Jimenez, YE and Brainerd, EL},
+  journal={Integrative Organismal Biology},
+  volume={2},
+  number={1},
+  pages={obaa021},
+  year={2020},
+  publisher={Oxford University Press}
+}
