@@ -1,0 +1,138 @@
+---
+title: "Final Project - Remoras"
+author: "R-amoras : Teresa Capella, Courtney Cheung, Kayla Vidal"
+date: "2022-12-12"
+output: html_document
+bibliography: Final Project Bibliography.bib
+---
+
+```{r, packages, include=FALSE}
+library(tidyverse)
+library(trackter)
+```
+
+# Introduction
+
+This project will focus on examining the feeding methods of remora fish, sometimes referred to as “suckerfish.” Suction feeding is a common method for many fish species which involves hyoid depression (via urohyal retraction and hypaxial muscles) and cranial elevation (via epaxial muscles). In conjunction, these movements create a rapid mouth expansion, increasing volume and decreasing pressure inside the mouth cavity, which generates high-velocity water and food moving into the mouth [@CampSuction] [@camp2014role] Remora feeding is of particular interest because of this species’ modified dorsal fin. Remora fishes possess high-powered suction discs on their dorsal surface that allow them to attach to hosts to provide for food and safety without harming their host or requiring extensive energy. This suction disc consists of slat-like structures with adhesion capable of attaching to the surface of a host [@wang2022biomimetic]. The use of these suction discs of remora fishes may have an impact on their suction feeding, specifically the changes in hyoid expansion and cranial elevation during feeding opportunities.
+Additional background work done in this realm regarding the feeding methods and suction disc of remora fish include analyzing the remora’s specific movements of motion under different adhesive conditions [@wang2022biomimetic]. Depending on environmental changes, three different states of the remora suction disc was observed within this study. The disc structure was found to be integrated and compact, allowing for a wide-range of adhesion-force control through coordinated movement of the suction disc and pectoral fins of the remora. These conclusions allowed for a greater understanding of natural adhesion mechanisms and of the remora’s ability in regards to attachment and detachment motions. A further study examined the relation between hyoid expansion and head length in the species Clarias gariepinus, an air-breathing catfish [@van2005test]. This study analyzed the mechanisms of mouth opening in catfish, specifically if all mechanisms contribute directly to the entire mouth opening or to hyoid depression, and if different mechanisms occurred during the initial or later phase of lower jaw or hyoid motion. It was found that the opercular mouth opening mechanism is active for longer than just the initial stages. Hyoid elevation was found to be fundamental towards a suction feeding fish’s prey capture success as well as that maximal hyoid depression is larger than its length when compared to hyoid expansion. However, hyoid depression mechanisms were also conclusively found to be unable to be applied to all teleost fishes, encouraging for more data to be gathered regarding differing fishes. This suggests that species-specific research is necessary to understand hyoid and cranial mechanisms involved in feeding.
+In this project, our aims focus on the method of suction feeding via cranial elevation and hyoid (or lateral) expansion in remora fish.
+ 
+The questions that we aim to answer in our project include:
+What is the average maximum cranial elevation angle for this remora fish during a feeding event?
+What is the average hyoid depression in relation to head length?
+Is cranial elevation or hyoid depression significant in increasing the mouth cavity volume?
+Do such patterns occur similarly within all species, according to the current literature? If not, what contributes to such differences? 
+
+<center>
+[![Remora](http://3.bp.blogspot.com/--kW2dQhsSlM/UMR4LxqKQMI/AAAAAAAAFpI/_-JycVQkwJ0/s1600/slender_suckerfish.jpg)
+</center>
+
+
+# Methods
+
+For this project, the main methodology involved three parts: feeding, video analysis, and statistical analysis. A remora fish was left without food for about 5 days; after this period, a camera was set up to record the subsequent feeding events. For each feeding event, a small piece of shrimp was dropped in the tank, and videos where the full side of the fish was visible for the whole feeding event were kept. The videos were clipped to only include frames from the feeding event. Next, the videos were uploaded to ImageJ and the plugin MTrack was used to track five points throughout each video: the tip of the dorsal jaw (1), the tip of the ventral jaw (2), the joint of the pectoral fin (3), the joint of the pelvic fin (4), and the lowest point on the fish’s gullet (5), labeled in this order. The data was loaded into R and distances were measured from points 1 to 2, 2 to 3, 3 to 4, and 3 to 5. These distances were used to calculate the change in angle to determine how much the mouth opened for the duration of the feeding event. We looked at the increase in angle of the upper jaw to analyze cranial elevation, the distance between the horizontal line from dorsal faw tip to pectoral fin and the bottom of its gullet to analyze hyoid expansion,  and the distance between the dorsal and ventral jaw tips to see how much it opened its mouth (“gap”). Graphs were created that allowed us to track mouth gap changes with increasing frames for five consecutive trials. 
+
+
+
+```{r, setup, include=FALSE}
+videos <- list.files(pattern="csv")
+
+data <- list()
+for(i in videos){
+  exp <- gsub("Ram_vid(\\d)points.csv","\\1",i) %>% as.numeric
+  d <- read_csv(i) %>% 
+    select(TID,PID,`x [pixel]`,`y [pixel]`) %>% 
+    rename(point=TID,frame=PID,x=`x [pixel]`,y=`y [pixel]`) %>% 
+    pivot_wider(names_from = "point", values_from=c("x","y")) %>% 
+    mutate(d23=dist.2d(x_1,x_3,y_1,y_3),
+           d34=dist.2d(x_3,x_4,y_3,y_4),
+           gap=dist.2d(x_1,x_2,y_1,y_2),
+           d42=dist.2d(x_4,x_1,y_4,y_1)) %>%
+    na.omit %>% 
+    group_by(frame) %>% 
+    mutate(CE_alpha=deg(cosine.ang(d23,d34,d42))) %>% 
+    ungroup() %>% 
+    mutate(CE_alpha2=CE_alpha-first(CE_alpha,1)) %>% 
+    mutate(hy_exp=dist.2d(x_5,x_5,y_3,y_5)/dist.2d(x_1,x_3,y_1,y_3)) %>% 
+    mutate(hy_exp2=abs(hy_exp-first(hy_exp,1))) %>% 
+    mutate(gap2=abs(gap-first(gap,1))) %>% 
+    mutate(exp=exp)
+  
+  data[[i]] <- d
+}
+
+
+data2 <- do.call(rbind,data)
+
+
+```
+
+# Results
+
+## Cranial Elevation
+
+```{r cranial, echo=FALSE}
+data2 %>% 
+  ggplot(aes(frame,CE_alpha2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+labs(y = "Cranial Elevation (\u00B0)")
+
+data2 %>% 
+  ggplot(aes(frame,CE_alpha2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+facet_wrap(~exp)+labs(y = "Cranial Elevation (\u00B0)")
+```
+
+## Hyoid Expansion
+```{r hyoid, echo=FALSE}
+data2 %>% 
+  ggplot(aes(frame,hy_exp2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+labs(y = "Hyoid Expansion")
+
+data2 %>% 
+  ggplot(aes(frame,hy_exp2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+facet_wrap(~exp)+labs(y = "Hyoid Expansion")
+
+```
+
+## Mouth Gap Change 
+
+```{r gap, echo=FALSE}
+data2 %>% 
+  ggplot(aes(frame,gap2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+labs(y = "Mouth Gap Change")
+
+data2 %>% 
+  ggplot(aes(frame,gap2,col=as.factor(exp)))+geom_point()+ guides(color = guide_legend(title = "Trials"))+facet_wrap(~exp)+labs(y = "Mouth Gap Change")
+
+```
+
+
+## Summary
+
+```{r summary, echo=FALSE}
+data2 %>% 
+  group_by(exp) %>% 
+  summarize(CE_alpha2=diff(range(CE_alpha2)),hy_exp2=diff(range(hy_exp2)),gap2=diff(range(gap)))
+```
+
+For each trial, we witnessed an angle increase between the pectoral fin joint, the tip of the upper jaw, and the pelvic fin joint as the jaw began to open. The largest angle was where the top jaw was opened the widest. The difference between this largest angle and the “ resting closed mouth” angle measured which we marked as the first angle angle, was 33.5, 47.2, 36.3, 43.1, and 37.6 respectively for trials 1-5. On average, this fish had a maximum cranial elevation angle of 39.54. Additionally, the hyoid expansion, had on average an increase of 8.76 % of the head length. 
+
+# Discussion
+
+According to our results, the average maximum cranial elevation for this remora fish was 39.54°, the average hyoid depression was 8.76% of the head length, and the average maximum gap between ventral and dorsal jaw tips was 46.72 pixels. Additionally, our results indicate that both cranial elevation and hyoid depression are significant measures in the mouth cavity volume increase required for suction feeding. The utilization of both cranial elevation and hyoid expansion by remora fish aligns with the current literature on suction feeding in other fish species. @CampSuction discusses the utilization of minimal cranial elevation and lateral expansion via hyoid retraction and depression of channel catfish, or Ictalurus punctatus. In a study by @svanback2002linking, largemouth bass (Micropterus salmoides) were found to have a mean peak hyoid depression of 11.47 mm and a mean peak cranial elevation of 12.02°. This cranial elevation differs significantly from the measurements in this study, although the anatomy of largemouth bass and remora fish is not necessarily directly comparable. This difference could also be due to the relative size of prey/food. Additionally, the researchers in this study noted that peak cranial elevation (as well as time to peak gape) was positively correlated with the duration of subambient pressure pulse, indicating that pressure is another potential variable between their experiment and ours. 
+ 
+Across experiments, we noted that the maximum jaw gap did not correspond with the maximum cranial elevation, indicating that the remora did rely heavily on hyoid expansion. This finding leads to an area of possible future research to investigate any inhibition the suction disc may place on cranial elevation during feeding. This would cause the cranial elevation of the remora to be relatively decreased and the hyoid depression to be relatively increased as a compensatory measure in comparison to other species. Moreover, a specific facet of this research may be the musculature involved in remora suction feeding; while cranial elevation is powered by epaxial muscles, hyoid movement can be generated by sternohyoid and/or hypaxial muscles. @camp2014role found that hypaxial muscles, but not the sternohyoid, contributes to hyoid retraction in largemouth bass; however, this may differ for remora fish, particularly if this species relies more heavily on hyoid retraction and depression for suction feeding. An additional study demonstrated the role of the differing sternohyoideus muscle during suction feeding in ray-finned fishes [@lomax2020bifunctional]. Within this study, it was demonstrated how the sternohyoideus functions as a stiff ligament that transmits power to the hyoid apparatus during suction feeding with the ability to shorten and contribute muscle power. It was found that the sternohyoideus muscle size can act as a predictor of function as fishes with a larger sternohyoideus would experience a shortening during suction feeding while fishes with a smaller sternohyoideus will have an isometric muscle. These literature findings demonstrate the differences that exist within the mechanisms related to cranial elevation and hyoid movement between differing species, and indicate that further research is needed in this area.
+ 
+Further data and analysis related to this subject will allow for a greater understanding upon the feeding methods of species similar to those of remora fishes, the evolutionary adaptations that occurred with changes towards cranial elevation and hyoid depression, and the advantages and disadvantages that are experienced, specifically how they impact certain habits within the marine ecosystem. 
+ 
+
+# Author Contributions
+
+Kayla worked on the markdown code, methods, and results. 
+Teresa worked on the introduction, methods, and discussion. 
+Courtney worked on the introduction, methods, and discussion. 
+
+# CPK Comments
+
+Y'all hit a homerun!!! The analysis is clear and concise. The visualized data/figures add a ton to the study. Your framing of the results in the discussion is spot on, using lots of literature to contextualize your kinematic results. So cool to find that cranial elevation is higher than a generalized suction feeder like a bass!
+
+Congrats!!
+
+150/150
+
+# Bibliography
+
